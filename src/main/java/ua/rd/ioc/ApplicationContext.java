@@ -13,7 +13,7 @@ public class ApplicationContext implements Context {
     }
 
     public ApplicationContext() {
-        beanDefinitions = Config.EMPTY_BEAN_DEFINITION;//new BeanDefinition[0];
+        beanDefinitions = Config.EMPTY_BEAN_DEFINITION;
     }
 
     public Object getBean(String beanName) throws IllegalAccessException, InstantiationException {

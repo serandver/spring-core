@@ -95,7 +95,6 @@ public class ApplicationContextTest {
     public void getBeanWithOneBeanDefinition() throws Exception {
         String beanName = "FirstBean";
         Class<TestBean> beanType =  TestBean.class;
-        //TODO
         Map<String, Class<?>> beanDescriptions =
                 new HashMap<String, Class<?>>(){{
                     put(beanName, beanType);
