@@ -30,7 +30,9 @@ public class ApplicationContextTest {
     @Test
     public void getBeanDefinitionNamesWithOneBeanDefinition() throws Exception {
         String beanName = "FirstBean";
-        List<String> beanDescriptions = Arrays.asList(beanName);
+        Map<String, Class<?>> beanDescriptions = new HashMap<String, Class<?>>(){{
+            put(beanName, String.class);
+        }};
         Config config = new JavaMapConfig(beanDescriptions);
         Context context = new ApplicationContext(config);
 
@@ -42,7 +44,8 @@ public class ApplicationContextTest {
 
     @Test
     public void getBeanDefinitionNamesWithEmptyBeanDefinition() throws Exception {
-        List<String> beanDescriptions = Collections.emptyList();
+        Map<String, Class<?>> beanDescriptions = Collections.emptyMap();
+
         Config config = new JavaMapConfig(beanDescriptions);
         Context context = new ApplicationContext(config);
 
@@ -59,7 +62,12 @@ public class ApplicationContextTest {
         String beanName2 = "ThirdBean";
         String beanName3 = "ForthBean";
 
-        List<String> beanDescriptions = Arrays.asList(beanName, beanName1, beanName2, beanName3);
+        Map<String, Class<?>> beanDescriptions = new LinkedHashMap<String, Class<?>>(){{
+            put(beanName, String.class);
+            put(beanName1, String.class);
+            put(beanName2, String.class);
+            put(beanName3, String.class);
+        }};
         Config config = new JavaMapConfig(beanDescriptions);
         Context context = new ApplicationContext(config);
 
@@ -72,7 +80,9 @@ public class ApplicationContextTest {
     @Test
     public void getBeanWithOneBeanDefinitionIsNotNull() throws Exception {
         String beanName = "FirstBean";
-        List<String> beanDescriptions = Arrays.asList(beanName);
+        Map<String, Class<?>> beanDescriptions = new HashMap<String, Class<?>>(){{
+            put(beanName, String.class);
+        }};
         Config config = new JavaMapConfig(beanDescriptions);
         Context context = new ApplicationContext(config);
 
@@ -99,5 +109,5 @@ public class ApplicationContextTest {
         assertNotNull(bean);
     }
 
-    private static class TestBean{}
+    static class TestBean{}
 }
