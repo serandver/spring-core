@@ -4,9 +4,9 @@ import java.util.Map;
 
 public class JavaMapConfig implements Config {
 
-    private Map<String, Class<?>> beanDescriptions;
+    private Map<String, Map<String, Object>> beanDescriptions;
 
-    public JavaMapConfig(Map<String, Class<?>> beanDescriptions) {
+    public JavaMapConfig(Map<String, Map<String, Object>> beanDescriptions) {
         this.beanDescriptions = beanDescriptions;
     }
 
@@ -19,17 +19,11 @@ public class JavaMapConfig implements Config {
         return beanDefinitions;
     }
 
-    private BeanDefinition beanDefinition(Map.Entry<String, Class<?>> entry) {
-        return new BeanDefinition() {
-            @Override
-            public String getBeanName() {
-                return entry.getKey();
-            }
-
-            @Override
-            public Class<?> getBeanType() {
-                return entry.getValue();
-            }
-        };
+    private BeanDefinition beanDefinition(Map.Entry<String, Map<String, Object>> descriptionEntry) {
+        return new SimpleBeanDefinition(
+                descriptionEntry.getKey(),
+                (Class<?>)descriptionEntry.getValue().get("type"),
+                (boolean) descriptionEntry.getValue().getOrDefault("isPrototype", false)
+        );
     }
 }
