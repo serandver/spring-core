@@ -1,6 +1,7 @@
 package ua.rd.ioc;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class ApplicationContext implements Context {
@@ -54,10 +55,25 @@ public class ApplicationContext implements Context {
     }
 
     private Object createBeanWithConstructorWithParams(Class<?> type) {
-        //TODO get parameters, change first letter to lowercase, call getBean
+        Class<?>[] parameterTypes = type.getDeclaredConstructors()[0].getParameterTypes();
+        List<Object> paramBeans = new ArrayList<>();
 
+        for (Class<?> parameterType : parameterTypes) {
+            String beanName = Character.toLowerCase(parameterType.getSimpleName().charAt(0))
+                    + parameterType.getSimpleName().substring(1);
+            Object bean = getBean(beanName);
+            paramBeans.add(bean);
+        }
 
-        return null;
+        Object bean = null;
+
+        try {
+            bean = type.getConstructor(parameterTypes).newInstance(paramBeans.toArray());
+        } catch (Exception e) {
+            new RuntimeException(e);
+        }
+
+        return bean;
     }
 
     private Object createBeanWithDefaultConstructor(Class<?> type) {

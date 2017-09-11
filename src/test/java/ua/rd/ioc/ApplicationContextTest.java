@@ -206,12 +206,12 @@ public class ApplicationContextTest {
     public void getBeanWithDependedBeans() throws Exception {
         Map<String, Map<String, Object>> beanDescriptions =
                 new HashMap<String, Map<String, Object>>(){{
-                    put("dependedBean",
+                    put("testBean",
                             new HashMap<String, Object>(){{
                                 put("type", TestBean.class);
                                 put("isPrototype", false);
                             }});
-                    put("bean",
+                    put("testBeanWithConstructor",
                             new HashMap<String, Object>(){{
                                 put("type", TestBeanWithConstructor.class);
                                 put("isPrototype", false);
@@ -221,7 +221,7 @@ public class ApplicationContextTest {
         Config config = new JavaMapConfig(beanDescriptions);
         Context context = new ApplicationContext(config);
 
-        TestBeanWithConstructor bean = (TestBeanWithConstructor) context.getBean("bean");
+        TestBeanWithConstructor bean = (TestBeanWithConstructor) context.getBean("testBeanWithConstructor");
 
         assertNotNull(bean);
     }
