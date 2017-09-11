@@ -1,5 +1,6 @@
 package ua.rd.ioc;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.*;
@@ -82,6 +83,7 @@ public class ApplicationContextTest {
         assertArrayEquals(expected, actual);
     }
 
+    @Ignore
     @Test
     public void getBeanWithOneBeanDefinitionIsNotNull() throws Exception {
         String beanName = "FirstBean";
@@ -117,7 +119,6 @@ public class ApplicationContextTest {
         assertNotNull(bean);
     }
 
-    static class TestBean{}
 
     private Map<String, Map<String, Object>> convertTestMapToMapMap (Map<String, Class<?>> beanDescriptions) {
         Map<String, Map<String, Object>> converted = new LinkedHashMap<>();
@@ -199,5 +200,40 @@ public class ApplicationContextTest {
         TestBean bean2 = (TestBean) context.getBean(beanName);
 
         assertNotSame(bean1, bean2);
+    }
+
+    @Test
+    public void getBeanWithDependedBeans() throws Exception {
+        Map<String, Map<String, Object>> beanDescriptions =
+                new HashMap<String, Map<String, Object>>(){{
+                    put("dependedBean",
+                            new HashMap<String, Object>(){{
+                                put("type", TestBean.class);
+                                put("isPrototype", false);
+                            }});
+                    put("bean",
+                            new HashMap<String, Object>(){{
+                                put("type", TestBeanWithConstructor.class);
+                                put("isPrototype", false);
+                            }});
+                }};
+
+        Config config = new JavaMapConfig(beanDescriptions);
+        Context context = new ApplicationContext(config);
+
+        TestBeanWithConstructor bean = (TestBeanWithConstructor) context.getBean("bean");
+
+        assertNotNull(bean);
+    }
+
+    static class TestBean{}
+
+    static class TestBeanWithConstructor{
+
+        private final TestBean testBean;
+
+        public TestBeanWithConstructor(TestBean testBean) {
+            this.testBean = testBean;
+        }
     }
 }

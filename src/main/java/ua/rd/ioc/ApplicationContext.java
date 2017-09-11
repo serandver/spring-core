@@ -1,5 +1,6 @@
 package ua.rd.ioc;
 
+import java.lang.reflect.Constructor;
 import java.util.*;
 
 public class ApplicationContext implements Context {
@@ -40,11 +41,33 @@ public class ApplicationContext implements Context {
     }
 
     private Object createNewBeanInstance(BeanDefinition bd) {
+        Class<?> type = bd.getBeanType();
+        Constructor<?> constructor = type.getDeclaredConstructors()[0];
+        Object newBean = null;
+        if (constructor.getParameterCount() == 0) {
+            newBean = createBeanWithDefaultConstructor(type);
+        }
+        else {
+            newBean = createBeanWithConstructorWithParams(type);
+        }
+        return newBean;
+    }
+
+    private Object createBeanWithConstructorWithParams(Class<?> type) {
+        //TODO get parameters, change first letter to lowercase, call getBean
+
+
+        return null;
+    }
+
+    private Object createBeanWithDefaultConstructor(Class<?> type) {
+        Object newBean;
         try {
-            return bd.getBeanType().newInstance();
+            newBean = type.newInstance();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        return newBean;
     }
 
     public String[] getBeanDefinitionNames() {
