@@ -68,7 +68,7 @@ public class ApplicationContext implements Context {
             this.beanDefinition = beanDefinition;
         }
 
-        void createNewBeanInstance() {
+        private void createNewBeanInstance() {
             Class<?> type = beanDefinition.getBeanType();
             Constructor<?> constructor = type.getDeclaredConstructors()[0];
             if (constructor.getParameterCount() == 0) {
@@ -79,7 +79,43 @@ public class ApplicationContext implements Context {
             }
         }
 
-        void callPostConstructAnnotatedMethod() {
+        private Object createBeanWithDefaultConstructor(Class<?> type) {
+            Object newBean;
+            try {
+                newBean = type.newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            return newBean;
+        }
+
+        private Object createBeanWithConstructorWithParams(Class<?> type) {
+            Constructor<?> constructor = type.getDeclaredConstructors()[0];
+            Class<?>[] parameterTypes = constructor.getParameterTypes();
+            Object[] paramsVal = new Object[parameterTypes.length];
+            for (int i = 0; i < parameterTypes.length; i++) {
+                Class<?> paramType = parameterTypes[i];
+                String beanName = getBeanNameByType(paramType);
+                paramsVal[i] = getBean(beanName);
+            }
+            Object newBean;
+            try {
+                newBean = constructor.newInstance(paramsVal);
+            } catch (Exception e) {
+                throw new IllegalArgumentException(e);
+            }
+            return newBean;
+        }
+
+        private String getBeanNameByType(Class<?> paramType) {
+            System.out.println(paramType);
+            String paramTypeName = paramType.getSimpleName();
+            String localBeanName
+                    = Character.toLowerCase(paramTypeName.charAt(0)) + paramTypeName.substring(1);
+            return localBeanName;
+        }
+
+        private void callPostConstructAnnotatedMethod() {
             Class<?> beanType = bean.getClass();
 
             List<Method> allMethods = Arrays.asList(beanType.getDeclaredMethods());
@@ -96,93 +132,42 @@ public class ApplicationContext implements Context {
             }
         }
 
-         void callInitMethod() {
-            Class<?> beanType = bean.getClass();
-            final List<Method> methods = Arrays.asList(beanType.getMethods());
-            if (methods.stream().map(m -> m.getName()).filter(m -> m.equals("init")).findAny().isPresent()) {
-                try {
-                    Method initMethod = beanType.getMethod("init");
-                    if (initMethod != null) {
-                        initMethod.invoke(bean);
-                    }
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                }
-                catch (IllegalAccessException | InvocationTargetException e) {
-                }
-            }
+        private void callInitMethod() {
+             Class<?> beanType = bean.getClass();
+             try {
+                 Method initMethod = beanType.getMethod("init");
+                 initMethod.invoke(bean);
+             } catch (NoSuchMethodException e) {
+             } catch (IllegalAccessException | InvocationTargetException e) {
+                 throw new RuntimeException(e);
+             }
         }
 
         private void createBenchmarkProxy() {
-            Class<?> beanClass = bean.getClass();
-
+            Class<?> beanType = bean.getClass();
+            Object newBean = bean;
             bean = Proxy.newProxyInstance(
-                    beanClass.getClassLoader(),
-                    beanClass.getInterfaces(),
+                    beanType.getClassLoader(),
+                    beanType.getInterfaces(),
                     new InvocationHandler() {
                         @Override
                         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                            if (method.isAnnotationPresent(Benchmark.class)) {
-                                String interfaceMethodName = method.getName();
-
-                                Method[] methods = beanClass.getMethods();
-                                Method annotatedWithBenchmarkMethod = null;
-                                for (Method m: methods) {
-                                    if (method.getName().equals(interfaceMethodName)) {
-                                        annotatedWithBenchmarkMethod = method;
-                                    }
-                                }
-                                long start = System.nanoTime();
-                                Object result = annotatedWithBenchmarkMethod.invoke(bean, args);
-                                long end = System.nanoTime();
-                                long timeSpent = start - end;
-                                System.out.println(timeSpent);
+                            Method m = beanType.getMethod(method.getName(), method.getParameterTypes());
+                            if (m.isAnnotationPresent(Benchmark.class)) {
+                                Long start = System.nanoTime();
+                                Object result = method.invoke(newBean, args);
+                                Long stop = System.nanoTime();
+                                System.out.println("Duration: " + (stop - start));
                                 return result;
-                            }
-                            else {
+                            } else {
                                 return method.invoke(bean, args);
                             }
-                        };
-                    }
-            );
+                        }
+                    });
         }
 
         public Object build() {
             return bean;
         }
-
-        private Object createBeanWithConstructorWithParams(Class<?> type) {
-            Class<?>[] parameterTypes = type.getDeclaredConstructors()[0].getParameterTypes();
-            List<Object> paramBeans = new ArrayList<>();
-
-            for (Class<?> parameterType : parameterTypes) {
-                String beanName = Character.toLowerCase(parameterType.getSimpleName().charAt(0))
-                        + parameterType.getSimpleName().substring(1);
-                Object bean = getBean(beanName);
-                paramBeans.add(bean);
-            }
-
-            Object bean = null;
-
-            try {
-                bean = type.getConstructor(parameterTypes).newInstance(paramBeans.toArray());
-            } catch (Exception e) {
-                new RuntimeException(e);
-            }
-
-            return bean;
-        }
-
-        private Object createBeanWithDefaultConstructor(Class<?> type) {
-            Object newBean;
-            try {
-                newBean = type.newInstance();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            return newBean;
-        }
     }
-
-
 }

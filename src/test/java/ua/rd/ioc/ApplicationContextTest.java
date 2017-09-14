@@ -205,17 +205,19 @@ public class ApplicationContextTest {
     @Test
     public void getBeanWithDependedBeans() throws Exception {
         Map<String, Map<String, Object>> beanDescriptions =
-                new HashMap<String, Map<String, Object>>(){{
-                    put("testBean",
-                            new HashMap<String, Object>(){{
+                new HashMap<String, Map<String, Object>>() {{
+                    put("myInterface",
+                            new HashMap<String, Object>() {{
                                 put("type", TestBean.class);
                                 put("isPrototype", false);
-                            }});
+                            }}
+                    );
                     put("testBeanWithConstructor",
-                            new HashMap<String, Object>(){{
+                            new HashMap<String, Object>() {{
                                 put("type", TestBeanWithConstructor.class);
                                 put("isPrototype", false);
-                            }});
+                            }}
+                    );
                 }};
 
         Config config = new JavaMapConfig(beanDescriptions);
@@ -281,6 +283,7 @@ public class ApplicationContextTest {
 
         MyInterface bean = (MyInterface) context.getBean("testBean");
 
+        bean.methodToBenchmark("asdasda");
         assertEquals("benchmark", TestBean.benchmarkMethod);
     }
 
@@ -299,7 +302,8 @@ public class ApplicationContextTest {
             postConstructValue = "initialized by postConstruct";
         }
 
-        //sout time how long method is invoked via proxy
+        @Override
+        @Benchmark
         public String methodToBenchmark(String str) {
             benchmarkMethod = "benchmark";
             return new StringBuilder(str).reverse().toString();
@@ -308,10 +312,20 @@ public class ApplicationContextTest {
 
     static class TestBeanWithConstructor implements MyInterface{
 
-        private final TestBean testBean;
+        private final MyInterface testBean;
 
-        public TestBeanWithConstructor(TestBean testBean) {
+        public TestBeanWithConstructor(MyInterface testBean) {
             this.testBean = testBean;
         }
+
+        @Override
+        public String methodToBenchmark(String str) {
+            return null;
+        }
     }
+
+    interface MyInterface{
+        String methodToBenchmark(String str);
+    }
+
 }
