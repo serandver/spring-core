@@ -83,22 +83,6 @@ public class ApplicationContextTest {
         assertArrayEquals(expected, actual);
     }
 
-    @Ignore
-    @Test
-    public void getBeanWithOneBeanDefinitionIsNotNull() throws Exception {
-        String beanName = "FirstBean";
-        Map<String, Class<?>> beanDescriptions = new HashMap<String, Class<?>>(){{
-            put(beanName, String.class);
-        }};
-        Map<String, Map<String, Object>> convertedBeanDescriptions = convertTestMapToMapMap(beanDescriptions);
-        Config config = new JavaMapConfig(convertedBeanDescriptions);
-        Context context = new ApplicationContext(config);
-
-        Object bean = context.getBean(beanName);
-
-        assertNotNull(bean);
-    }
-
     @Test
     public void getBeanWithOneBeanDefinition() throws Exception {
         String beanName = "FirstBean";
@@ -118,7 +102,6 @@ public class ApplicationContextTest {
 
         assertNotNull(bean);
     }
-
 
     private Map<String, Map<String, Object>> convertTestMapToMapMap (Map<String, Class<?>> beanDescriptions) {
         Map<String, Map<String, Object>> converted = new LinkedHashMap<>();
@@ -303,7 +286,6 @@ public class ApplicationContextTest {
         }
 
         @Override
-        @Benchmark
         public String methodToBenchmark(String str) {
             benchmarkMethod = "benchmark";
             return new StringBuilder(str).reverse().toString();

@@ -160,7 +160,7 @@ public class ApplicationContext implements Context {
                                 System.out.println("Duration: " + (stop - start));
                                 return result;
                             } else {
-                                return method.invoke(bean, args);
+                                return method.invoke(newBean, args);
                             }
                         }
                     });
