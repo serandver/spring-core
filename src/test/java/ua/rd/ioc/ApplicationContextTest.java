@@ -285,6 +285,7 @@ public class ApplicationContextTest {
             postConstructValue = "initialized by postConstruct";
         }
 
+        @Benchmark(enabled = false)
         @Override
         public String methodToBenchmark(String str) {
             benchmarkMethod = "benchmark";

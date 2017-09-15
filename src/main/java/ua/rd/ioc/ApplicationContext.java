@@ -153,7 +153,7 @@ public class ApplicationContext implements Context {
                         @Override
                         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                             Method m = beanType.getMethod(method.getName(), method.getParameterTypes());
-                            if (m.isAnnotationPresent(Benchmark.class)) {
+                            if (m.isAnnotationPresent(Benchmark.class) && m.getAnnotation(Benchmark.class).enabled()) {
                                 Long start = System.nanoTime();
                                 Object result = method.invoke(newBean, args);
                                 Long stop = System.nanoTime();
