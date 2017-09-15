@@ -265,7 +265,6 @@ public class ApplicationContextTest {
         Context context = new ApplicationContext(config);
 
         MyInterface bean = (MyInterface) context.getBean("testBean");
-
         bean.methodToBenchmark("asdasda");
         assertEquals("benchmark", TestBean.benchmarkMethod);
     }
@@ -285,7 +284,7 @@ public class ApplicationContextTest {
             postConstructValue = "initialized by postConstruct";
         }
 
-        @Benchmark(enabled = false)
+        @Benchmark
         @Override
         public String methodToBenchmark(String str) {
             benchmarkMethod = "benchmark";

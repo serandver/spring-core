@@ -1,9 +1,7 @@
 package ua.rd.ioc;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
-import java.util.stream.Stream;
 
 public class ApplicationContext implements Context {
 
@@ -123,9 +121,7 @@ public class ApplicationContext implements Context {
                 if (method.isAnnotationPresent(MyPostConstruct.class)) {
                     try {
                         method.invoke(bean);
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    } catch (InvocationTargetException e) {
+                    } catch (IllegalAccessException | InvocationTargetException e) {
                         e.printStackTrace();
                     }
                 }
@@ -145,23 +141,29 @@ public class ApplicationContext implements Context {
 
         private void createBenchmarkProxy() {
             Class<?> beanType = bean.getClass();
+            Arrays.stream(beanType.getMethods()).forEach(m -> {
+                if(m.isAnnotationPresent(Benchmark.class)){
+                    createProxy();
+                }
+            });
+        }
+
+        private void createProxy() {
+            Class<?> beanType = bean.getClass();
             Object newBean = bean;
             bean = Proxy.newProxyInstance(
                     beanType.getClassLoader(),
                     beanType.getInterfaces(),
-                    new InvocationHandler() {
-                        @Override
-                        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                            Method m = beanType.getMethod(method.getName(), method.getParameterTypes());
-                            if (m.isAnnotationPresent(Benchmark.class) && m.getAnnotation(Benchmark.class).enabled()) {
-                                Long start = System.nanoTime();
-                                Object result = method.invoke(newBean, args);
-                                Long stop = System.nanoTime();
-                                System.out.println("Duration: " + (stop - start));
-                                return result;
-                            } else {
-                                return method.invoke(newBean, args);
-                            }
+                    (proxy, method, args) -> {
+                        Method m = beanType.getMethod(method.getName(), method.getParameterTypes());
+                        if (m.isAnnotationPresent(Benchmark.class) && m.getAnnotation(Benchmark.class).enabled()) {
+                            Long start = System.nanoTime();
+                            Object result = method.invoke(newBean, args);
+                            Long stop = System.nanoTime();
+                            System.out.println("Duration: " + (stop - start));
+                            return result;
+                        } else {
+                            return method.invoke(newBean, args);
                         }
                     });
         }
