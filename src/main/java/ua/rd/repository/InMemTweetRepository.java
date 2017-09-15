@@ -9,7 +9,7 @@ public class InMemTweetRepository implements TweetRepository {
 
     private List<Tweet> tweets;
 
-    {
+    public void init() {
         tweets = Arrays.asList(
                 new Tweet(1L, "1st Message", null),
                 new Tweet(2L, "2nd Message", null)
@@ -20,4 +20,6 @@ public class InMemTweetRepository implements TweetRepository {
     public Iterable<Tweet> allTweets() {
         return tweets;
     }
+
+
 }

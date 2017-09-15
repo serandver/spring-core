@@ -23,12 +23,16 @@ public class ApplicationContext implements Context {
 
     public Object getBean(String beanName) {
         BeanDefinition beanDefinition = getBeanDefinitionByName(beanName);
-        Object bean = beans.get(beanName);
-        if (bean != null) {
-            return bean;
-        }
 
-        bean = createNewBean(beanDefinition);
+        return Optional
+                .ofNullable(beans.get(beanName))
+                .orElseGet(() ->
+                    createBeanByBeanDefinition(beanDefinition));
+    }
+
+    private Object createBeanByBeanDefinition(BeanDefinition beanDefinition) {
+        String beanName = beanDefinition.getBeanName();
+        Object bean = createNewBean(beanDefinition);
         if (!beanDefinition.isPrototype()) {
             beans.put(beanName, bean);
         }

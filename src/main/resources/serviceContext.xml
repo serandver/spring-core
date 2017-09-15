@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean name="tweetService"
+          class="ua.rd.services.SimpleTweetService">
+        <constructor-arg ref="tweetRepository"/>
+    </bean>
+
+    <bean name="tweet" class="ua.rd.domain.Tweet" scope="prototype">
+        <constructor-arg type="java.lang.String" name="txt" value="Tweet2"/>
+        <constructor-arg type="ua.rd.domain.User" value="#{ null }"/>
+    </bean>
+
+    <alias name="tweet" alias="tweetParent"/>
+</beans>
